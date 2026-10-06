@@ -44,6 +44,11 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-openfeign</artifactId>
 		</dependency>
+		<!-- Soporte nativo para PATCH en OpenFeign (Apache HttpClient 5) -->
+		<dependency>
+			<groupId>io.github.openfeign</groupId>
+			<artifactId>feign-hc5</artifactId>
+		</dependency>
 
 		<!-- JJWT 0.11.5 -->
 		<dependency>

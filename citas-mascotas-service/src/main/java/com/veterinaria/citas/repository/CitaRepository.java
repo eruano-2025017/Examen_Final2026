@@ -15,7 +15,8 @@ public interface CitaRepository extends JpaRepository<CitaMedica, Long> {
 
     List<CitaMedica> findByVeterinarioIdOrderByFechaHoraAsc(Long veterinarioId);
 
-    List<CitaMedica> findByMascotaId(Long mascotaId);
+    @Query("SELECT c FROM CitaMedica c WHERE c.mascota.id = :mascotaId")
+    List<CitaMedica> findByMascotaId(@Param("mascotaId") Long mascotaId);
 
     /**
      * Consulta 1: Solapamiento de citas de 30 minutos por veterinarioId.
