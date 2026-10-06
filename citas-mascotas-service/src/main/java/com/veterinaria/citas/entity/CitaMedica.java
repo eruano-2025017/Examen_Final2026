@@ -21,8 +21,9 @@ public class CitaMedica {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @Column(name = "mascota_id", nullable = false)
-    private Long mascotaId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mascota_id", nullable = false)
+    private Mascota mascota;
 
     @Column(name = "veterinario_id", nullable = false)
     private Long veterinarioId;
@@ -36,5 +37,9 @@ public class CitaMedica {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private EstadoCita estado;
+
+    public Long getMascotaId() {
+        return mascota != null ? mascota.getId() : null;
+    }
 }
 

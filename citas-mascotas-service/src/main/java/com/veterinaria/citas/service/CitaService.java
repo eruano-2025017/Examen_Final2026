@@ -71,7 +71,7 @@ public class CitaService {
         }
 
         CitaMedica nuevaCita = CitaMedica.builder()
-                .mascotaId(dto.getMascotaId())
+                .mascota(mascota)
                 .veterinarioId(dto.getVeterinarioId())
                 .fechaHora(fechaHora)
                 .motivo(dto.getMotivo())

@@ -36,9 +36,8 @@ public interface CitaRepository extends JpaRepository<CitaMedica, Long> {
     /**
      * Consulta 2: Conteo de citas PENDIENTES por clienteId para la misma fecha.
      */
-    @Query("SELECT COUNT(c) FROM CitaMedica c, Mascota m " +
-           "WHERE c.mascotaId = m.id " +
-           "AND m.clienteId = :clienteId " +
+    @Query("SELECT COUNT(c) FROM CitaMedica c " +
+           "WHERE c.mascota.clienteId = :clienteId " +
            "AND c.estado = :estado " +
            "AND c.fechaHora >= :inicioDia " +
            "AND c.fechaHora <= :finDia")

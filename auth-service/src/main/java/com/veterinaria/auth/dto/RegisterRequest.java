@@ -23,7 +23,5 @@ public class RegisterRequest {
 
     @NotBlank(message = "La contrasena es obligatoria")
     private String password;
-
-    private Rol rol;
 }
 
