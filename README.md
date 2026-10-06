@@ -71,7 +71,7 @@ Hibernate actualiza el esquema automáticamente al iniciar (`ddl-auto=update`). 
 
 | Rol | Correo | Contraseña |
 | :--- | :--- | :--- |
-| ADMIN | admin@veterinaria.com | admin123 |
+| ADMIN | admin@veterinaria.com | Admin123* (o admin123) |
 | VET | veterinario@veterinaria.com | vet123 |
 | CLIENTE | cliente@correo.com | cliente123 |
 
