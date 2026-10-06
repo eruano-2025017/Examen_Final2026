@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Local context memory
+CONTEXTO_PROYECTO.md

@@ -24,6 +24,7 @@
 
 	<modules>
 		<module>auth-service</module>
+		<module>citas-mascotas-service</module>
 	</modules>
 
 </project>
