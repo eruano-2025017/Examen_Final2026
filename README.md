@@ -26,7 +26,10 @@ Examen_Final2026/
 ├── auth-service/               # Puerto 8081: Usuarios, roles y autenticación JWT
 │   ├── pom.xml
 │   └── src/
-└── citas-mascotas-service/     # Puerto 8082: Mascotas y agendamiento de citas
+├── citas-mascotas-service/     # Puerto 8082: Mascotas y agendamiento de citas
+│   ├── pom.xml
+│   └── src/
+└── expedientes-service/        # Puerto 8083: Historial clínico e integración vía OpenFeign
     ├── pom.xml
     └── src/
 ```
@@ -85,26 +88,49 @@ Ambos microservicios comparten la misma base de datos relacional en MySQL.
 | `PATCH` | `/api/v1/citas/{id}/cancelar` | `CLIENTE`, `ADMIN` | Cancela una cita (valida ventana de > 2 horas) |
 | `PATCH` | `/api/v1/citas/{id}/completar` | `VET`, `ADMIN` | Marca la cita como `COMPLETADA` |
 
+### 3. Servicio de Expedientes Clínicos (`expedientes-service` - Puerto 8083)
+
+| Método | Endpoint | Roles Permitidos | Descripción |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/v1/expedientes` | `VET`, `ADMIN` | Registra expediente y completa cita vía OpenFeign |
+| `GET` | `/api/v1/expedientes/mascota/{mascotaId}` | `VET`, `CLIENTE`, `ADMIN` | Consulta historial de expedientes por mascota |
+| `GET` | `/api/v1/expedientes/{id}` | `VET`, `CLIENTE`, `ADMIN` | Consulta expediente clínico por ID |
+| `GET` | `/api/v1/expedientes/cita/{citaId}` | `VET`, `CLIENTE`, `ADMIN` | Consulta expediente clínico por ID de cita |
+
 ---
 
 ## 💻 Instrucciones de Ejecución
 
-### 1. Compilar el proyecto completo
-Desde la raíz del proyecto ejecuta:
+### 1. Compilación e Instalación del Proyecto Completo
+Desde la raíz del proyecto ejecuta el comando estándar de Maven para limpiar, compilar e instalar todos los módulos:
 ```bash
-.\mvnw.cmd clean compile
+.\mvnw.cmd clean install -DskipTests
+```
+*(O simplemente `mvn clean install` si tienes Maven configurado en tu PATH global).*
+
+### 2. Iniciar los 3 Microservicios Simultáneamente (PowerShell)
+Puedes iniciar automáticamente los 3 servicios en terminales independientes ejecutando el script incluido:
+```powershell
+.\start-microservicios.ps1
 ```
 
-### 2. Iniciar los microservicios
+O si prefieres ejecutarlos manualmente en una sola línea o ventanas individuales:
 
-Abre una terminal para cada servicio o ejecútalos desde tu IDE:
-
-**Terminal 1 - Auth Service:**
-```bash
-.\mvnw.cmd spring-boot:run -pl auth-service
+**Opción A — Comando en una sola línea (PowerShell):**
+```powershell
+Start-Process powershell "-NoExit -Command .\mvnw.cmd spring-boot:run -pl auth-service"; Start-Process powershell "-NoExit -Command .\mvnw.cmd spring-boot:run -pl citas-mascotas-service"; Start-Process powershell "-NoExit -Command .\mvnw.cmd spring-boot:run -pl expedientes-service"
 ```
 
-**Terminal 2 - Citas y Mascotas Service:**
-```bash
-.\mvnw.cmd spring-boot:run -pl citas-mascotas-service
-```
+**Opción B — En terminales manuales:**
+- **Terminal 1 (Auth Service - Puerto 8081):**
+  ```bash
+  .\mvnw.cmd spring-boot:run -pl auth-service
+  ```
+- **Terminal 2 (Citas Service - Puerto 8082):**
+  ```bash
+  .\mvnw.cmd spring-boot:run -pl citas-mascotas-service
+  ```
+- **Terminal 3 (Expedientes Service - Puerto 8083):**
+  ```bash
+  .\mvnw.cmd spring-boot:run -pl expedientes-service
+  ```
