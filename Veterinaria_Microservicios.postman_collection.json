@@ -1,0 +1,435 @@
+{
+	"info": {
+		"_postman_id": "c9284d72-b715-4f32-8418-8098c1998f45",
+		"name": "Veterinaria API - Microservicios",
+		"description": "Colección completa para pruebas de los microservicios de Veterinaria (Auth 8081, Citas 8082, Expedientes 8083)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "auth_url",
+			"value": "http://localhost:8081",
+			"type": "string"
+		},
+		{
+			"key": "citas_url",
+			"value": "http://localhost:8082",
+			"type": "string"
+		},
+		{
+			"key": "expedientes_url",
+			"value": "http://localhost:8083",
+			"type": "string"
+		},
+		{
+			"key": "token_cliente",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "token_vet",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "token_admin",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Auth Service (8081)",
+			"item": [
+				{
+					"name": "1.1 Login - Cliente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.collectionVariables.set('token_cliente', jsonData.token);",
+									"    console.log('Token de CLIENTE guardado');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"cliente@correo.com\",\n  \"password\": \"cliente123\"\n}"
+						},
+						"url": {
+							"raw": "{{auth_url}}/api/v1/auth/login",
+							"host": [
+								"{{auth_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					}
+				},
+				{
+					"name": "1.2 Login - Veterinario",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.collectionVariables.set('token_vet', jsonData.token);",
+									"    console.log('Token de VET guardado');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"veterinario@veterinaria.com\",\n  \"password\": \"vet123\"\n}"
+						},
+						"url": {
+							"raw": "{{auth_url}}/api/v1/auth/login",
+							"host": [
+								"{{auth_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					}
+				},
+				{
+					"name": "1.3 Login - Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.collectionVariables.set('token_admin', jsonData.token);",
+									"    console.log('Token de ADMIN guardado');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@veterinaria.com\",\n  \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{auth_url}}/api/v1/auth/login",
+							"host": [
+								"{{auth_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					}
+				},
+				{
+					"name": "1.4 Register - Nuevo Cliente",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Maria Lopez\",\n  \"telefono\": \"55598765\",\n  \"email\": \"maria@correo.com\",\n  \"password\": \"maria123\"\n}"
+						},
+						"url": {
+							"raw": "{{auth_url}}/api/v1/auth/register",
+							"host": [
+								"{{auth_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"register"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Mascotas (8082)",
+			"item": [
+				{
+					"name": "2.1 Mis Mascotas (Cliente)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_cliente}}"
+							}
+						],
+						"url": {
+							"raw": "{{citas_url}}/api/v1/mascotas/mis-mascotas",
+							"host": [
+								"{{citas_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"mascotas",
+								"mis-mascotas"
+							]
+						}
+					}
+				},
+				{
+					"name": "2.2 Registrar Mascota (Cliente)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_cliente}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Pelusa\",\n  \"especie\": \"GATO\",\n  \"raza\": \"Persa\",\n  \"edad\": 2\n}"
+						},
+						"url": {
+							"raw": "{{citas_url}}/api/v1/mascotas",
+							"host": [
+								"{{citas_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"mascotas"
+							]
+						}
+					}
+				},
+				{
+					"name": "2.3 Ver Mascota por ID (Vet/Admin)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_vet}}"
+							}
+						],
+						"url": {
+							"raw": "{{citas_url}}/api/v1/mascotas/1",
+							"host": [
+								"{{citas_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"mascotas",
+								"1"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Citas Médicas (8082)",
+			"item": [
+				{
+					"name": "3.1 Agendar Cita (Cliente)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_cliente}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"mascotaId\": 1,\n  \"veterinarioId\": 2,\n  \"fechaHora\": \"2026-11-20T10:00:00\",\n  \"motivo\": \"Vacunacion antirrabica\"\n}"
+						},
+						"url": {
+							"raw": "{{citas_url}}/api/v1/citas",
+							"host": [
+								"{{citas_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"citas"
+							]
+						}
+					}
+				},
+				{
+					"name": "3.2 Ver Agenda de Citas (Vet)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_vet}}"
+							}
+						],
+						"url": {
+							"raw": "{{citas_url}}/api/v1/citas/agenda",
+							"host": [
+								"{{citas_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"citas",
+								"agenda"
+							]
+						}
+					}
+				},
+				{
+					"name": "3.3 Cancelar Cita (Cliente)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_cliente}}"
+							}
+						],
+						"url": {
+							"raw": "{{citas_url}}/api/v1/citas/1/cancelar",
+							"host": [
+								"{{citas_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"citas",
+								"1",
+								"cancelar"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Expedientes Clínicos (8083)",
+			"item": [
+				{
+					"name": "4.1 Registrar Expediente (Vet - OpenFeign completa Cita)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_vet}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"citaId\": 1,\n  \"diagnostico\": \"Paciente en buen estado general con leve deshidratacion\",\n  \"tratamiento\": \"Administracion de suero y reposo por 24 horas\",\n  \"pesoKg\": 14.5\n}"
+						},
+						"url": {
+							"raw": "{{expedientes_url}}/api/v1/expedientes",
+							"host": [
+								"{{expedientes_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"expedientes"
+							]
+						}
+					}
+				},
+				{
+					"name": "4.2 Ver Historial por Mascota (Vet/Cliente/Admin)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_vet}}"
+							}
+						],
+						"url": {
+							"raw": "{{expedientes_url}}/api/v1/expedientes/mascota/1",
+							"host": [
+								"{{expedientes_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"expedientes",
+								"mascota",
+								"1"
+							]
+						}
+					}
+				}
+			]
+		}
+	]
+}
+

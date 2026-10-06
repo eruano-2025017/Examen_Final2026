@@ -134,3 +134,19 @@ Start-Process powershell "-NoExit -Command .\mvnw.cmd spring-boot:run -pl auth-s
   ```bash
   .\mvnw.cmd spring-boot:run -pl expedientes-service
   ```
+
+---
+
+## 🧪 Pruebas Funcionales y de Integración
+
+Una vez iniciados los 3 servicios, puedes ejecutar la suite de pruebas automatizadas:
+
+- **En Windows PowerShell:**
+  ```powershell
+  .\test-veterinaria.ps1
+  ```
+- **En Git Bash o Linux / macOS:**
+  ```bash
+  chmod +x test-veterinaria.sh
+  ./test-veterinaria.sh
+  ```

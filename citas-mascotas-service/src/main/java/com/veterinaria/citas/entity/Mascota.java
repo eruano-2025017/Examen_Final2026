@@ -33,5 +33,9 @@ public class Mascota {
 
     @Column(name = "cliente_id", nullable = false)
     private Long clienteId;
+
+    @OneToMany(mappedBy = "mascota", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
+    private java.util.List<CitaMedica> citas = new java.util.ArrayList<>();
 }
 

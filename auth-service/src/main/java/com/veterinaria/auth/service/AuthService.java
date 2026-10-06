@@ -31,14 +31,13 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El email ya se encuentra registrado: " + request.getEmail());
         }
 
-        Rol rolAsignado = request.getRol() != null ? request.getRol() : Rol.CLIENTE;
-
+        // Seguridad: El registro publico siempre asigna estrictamente el rol CLIENTE
         Usuario usuario = Usuario.builder()
                 .nombre(request.getNombre())
                 .telefono(request.getTelefono())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .rol(rolAsignado)
+                .rol(Rol.CLIENTE)
                 .build();
 
         Usuario guardado = usuarioRepository.save(usuario);
