@@ -1,151 +1,183 @@
-# Sistema de Control de Citas para Veterinaria - API REST
+# Sistema de Control de Citas y Expedientes - Veterinaria
 
-API REST modular para la gestión de citas, mascotas, expedientes y usuarios en una clínica veterinaria. El proyecto está construido bajo una arquitectura de microservicios usando Maven Multi-Módulo con Spring Boot y una base de datos relacional MySQL.
-
----
-
-## 🛠️ Tecnologías
-
-- **Lenguaje:** Java 17
-- **Framework:** Spring Boot 3.3.0
-- **Seguridad:** Spring Security con autenticación JWT (JJWT 0.11.5) y contraseñas cifradas con BCrypt
-- **Persistencia:** Spring Data JPA / Hibernate
-- **Base de Datos:** MySQL Server 8.0
-- **Herramientas:** Maven, Lombok
+API REST desarrollada en Spring Boot para la gestión de citas médicas, pacientes (mascotas), expedientes clínicos y usuarios de una clínica veterinaria. El proyecto está organizado en una arquitectura de microservicios multi-módulo con Maven y persistencia en MySQL.
 
 ---
 
-## 🏗️ Arquitectura del Proyecto
+## 1. Tecnologías utilizadas
 
-El repositorio maneja un POM Padre (`veterinaria-parent`) que gestiona las versiones y dependencias comunes de los microservicios:
+- Java 17
+- Spring Boot 3.3.0
+- Spring Cloud OpenFeign 2023.0.3 (con cliente Apache HttpClient 5 para soporte de PATCH)
+- Spring Security (Autenticación stateless con JWT y contraseñas cifradas con BCrypt)
+- Spring Data JPA / Hibernate
+- MySQL 8.0
+- Maven Multi-Módulo (POM padre: `veterinaria-parent`)
+- Lombok
+
+---
+
+## 2. Estructura del proyecto
+
+El proyecto maneja un POM padre en la raíz (`veterinaria-parent`) que gestiona las dependencias comunes y tres módulos independientes:
 
 ```text
 Examen_Final2026/
-├── pom.xml                     # POM Padre (veterinaria-parent)
-├── .mvn/jvm.config             # Configuración de red/certificados para Maven
-├── auth-service/               # Puerto 8081: Usuarios, roles y autenticación JWT
+├── pom.xml                                   # POM Padre (veterinaria-parent)
+├── .mvn/jvm.config                           # Configuración SSL para Maven
+├── start-microservicios.ps1                  # Script para levantar los servicios en PowerShell
+├── test-veterinaria.ps1                      # Script de pruebas en PowerShell
+├── test-veterinaria.sh                       # Script de pruebas en Bash
+├── Veterinaria_Microservicios.postman_collection.json # Colección de Postman
+│
+├── auth-service/                             # Puerto 8081: Usuarios y autenticación JWT
 │   ├── pom.xml
-│   └── src/
-├── citas-mascotas-service/     # Puerto 8082: Mascotas y agendamiento de citas
+│   └── src/main/
+│       ├── java/com/veterinaria/auth/
+│       └── resources/
+│           ├── application.properties
+│           └── data.sql                      # Datos iniciales de usuarios
+│
+├── citas-mascotas-service/                   # Puerto 8082: Mascotas y citas médicas
 │   ├── pom.xml
-│   └── src/
-└── expedientes-service/        # Puerto 8083: Historial clínico e integración vía OpenFeign
+│   └── src/main/
+│       ├── java/com/veterinaria/citas/
+│       └── resources/
+│           ├── application.properties
+│           └── data.sql                      # Datos iniciales de mascota y cita
+│
+└── expedientes-service/                      # Puerto 8083: Historial clínico (consume citas vía Feign)
     ├── pom.xml
-    └── src/
+    └── src/main/
+        ├── java/com/veterinaria/expedientes/
+        └── resources/
+            └── application.properties
 ```
 
 ---
 
-## 🗄️ Base de Datos
+## 3. Base de datos y datos iniciales
 
-Ambos microservicios comparten la misma base de datos relacional en MySQL.
+Los tres microservicios se conectan a la misma base de datos MySQL local:
 
-- **Nombre de BD:** `veterinaria_db_in5am`
-- **Host / Puerto:** `localhost:3306`
-- **Usuario:** `IN5AM`
-- **Password:** `_odmon5Am`
+- Base de datos: `veterinaria_db_in5am`
+- Host/Puerto: `localhost:3306`
+- Usuario: `IN5AM`
+- Contraseña: `_odmon5Am`
 
-> Hibernate genera y actualiza las tablas automáticamente al iniciar cada servicio (`ddl-auto=update`). `auth-service` ejecuta una carga inicial desde `data.sql` con usuarios predeterminados.
+Hibernate actualiza el esquema automáticamente al iniciar (`ddl-auto=update`). Además, se configuró la carga inicial desde los archivos `data.sql` de cada módulo.
 
-### Usuarios Iniciales de Prueba
+### Usuarios de prueba (auth-service)
 
-| Rol | Email | Contraseña |
+| Rol | Correo | Contraseña |
 | :--- | :--- | :--- |
-| **ADMIN** | `admin@veterinaria.com` | `admin123` |
-| **VET** | `veterinario@veterinaria.com` | `vet123` |
-| **CLIENTE** | `cliente@correo.com` | `cliente123` |
+| ADMIN | admin@veterinaria.com | admin123 |
+| VET | veterinario@veterinaria.com | vet123 |
+| CLIENTE | cliente@correo.com | cliente123 |
+
+### Datos de prueba (citas-mascotas-service)
+
+- Mascota ID 1: "Firulais", perro Labrador Retriever de 3 años, perteneciente al cliente con ID 3.
+- Cita ID 1: Programada para el veterinario con ID 2 en estado `PENDIENTE`.
 
 ---
 
-## 📋 Reglas de Negocio Implementadas
+## 4. Reglas de negocio
 
-1. **Disponibilidad de Veterinarios:** Las citas tienen una duración fija de 30 minutos. El sistema bloquea cualquier intento de agendar dos citas con solapamiento de horario para el mismo veterinario.
-2. **Límite Diario de Cliente:** Un cliente no puede tener más de 2 citas en estado `PENDIENTE` para el mismo día.
-3. **Restricción de Cancelación:** Una cita solo puede ser cancelada si faltan más de 2 horas para la hora programada.
-4. **Seguridad Stateless:** Cada petición a rutas protegidas debe incluir el token en la cabecera HTTP:
-   `Authorization: Bearer <TOKEN_JWT>`
-
----
-
-## 🚀 Endpoints de la API
-
-### 1. Servicio de Autenticación (`auth-service` - Puerto 8081)
-
-| Método | Endpoint | Acceso | Descripción |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/api/v1/auth/register` | Público | Registra un usuario y genera su token JWT |
-| `POST` | `/api/v1/auth/login` | Público | Autentica credenciales y devuelve el token JWT |
-
-### 2. Servicio de Mascotas y Citas (`citas-mascotas-service` - Puerto 8082)
-
-| Método | Endpoint | Roles Permitidos | Descripción |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/v1/mascotas/mis-mascotas` | `CLIENTE` | Lista las mascotas del usuario autenticado |
-| `POST` | `/api/v1/mascotas` | `CLIENTE`, `ADMIN` | Registra una nueva mascota |
-| `GET` | `/api/v1/mascotas/{id}` | `VET`, `ADMIN` | Consulta información de una mascota por ID |
-| `POST` | `/api/v1/citas` | `CLIENTE`, `ADMIN` | Agenda una nueva cita (valida solapamiento y cupo diario) |
-| `GET` | `/api/v1/citas/agenda` | `VET`, `ADMIN` | Consulta la agenda de citas a partir de la fecha actual |
-| `PATCH` | `/api/v1/citas/{id}/cancelar` | `CLIENTE`, `ADMIN` | Cancela una cita (valida ventana de > 2 horas) |
-| `PATCH` | `/api/v1/citas/{id}/completar` | `VET`, `ADMIN` | Marca la cita como `COMPLETADA` |
-
-### 3. Servicio de Expedientes Clínicos (`expedientes-service` - Puerto 8083)
-
-| Método | Endpoint | Roles Permitidos | Descripción |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/api/v1/expedientes` | `VET`, `ADMIN` | Registra expediente y completa cita vía OpenFeign |
-| `GET` | `/api/v1/expedientes/mascota/{mascotaId}` | `VET`, `CLIENTE`, `ADMIN` | Consulta historial de expedientes por mascota |
-| `GET` | `/api/v1/expedientes/{id}` | `VET`, `CLIENTE`, `ADMIN` | Consulta expediente clínico por ID |
-| `GET` | `/api/v1/expedientes/cita/{citaId}` | `VET`, `CLIENTE`, `ADMIN` | Consulta expediente clínico por ID de cita |
+1. **Disponibilidad de veterinarios:** Las citas duran 30 minutos. No se puede agendar una cita si el veterinario ya tiene otra cita en un rango de 30 minutos antes o después.
+2. **Límite por cliente:** Un cliente no puede tener más de 2 citas en estado `PENDIENTE` para el mismo día.
+3. **Cancelación de citas:** Una cita solo se puede cancelar si faltan más de 2 horas para su realización.
+4. **Cierre de cita automático:** Al registrar un expediente clínico en `expedientes-service` (puerto 8083), este se comunica por OpenFeign con `citas-mascotas-service` (puerto 8082) y cambia el estado de la cita a `COMPLETADA`.
+5. **Seguridad y roles:** El registro público asigna obligatoriamente el rol `CLIENTE`. Las rutas protegidas requieren el token en la cabecera `Authorization: Bearer <token>`.
+6. **Mapeo de datos:** Los controladores no retornan entidades JPA directamente; devuelven DTOs para evitar problemas de serialización en Jackson.
 
 ---
 
-## 💻 Instrucciones de Ejecución
+## 5. Endpoints de la API
 
-### 1. Compilación e Instalación del Proyecto Completo
-Desde la raíz del proyecto ejecuta el comando estándar de Maven para limpiar, compilar e instalar todos los módulos:
-```bash
+### Auth Service (Puerto 8081)
+
+| Método | Ruta | Roles | Descripción |
+| :--- | :--- | :--- | :--- |
+| POST | /api/v1/auth/register | Público | Registro de usuarios (asigna rol CLIENTE) |
+| POST | /api/v1/auth/login | Público | Inicio de sesión, retorna token JWT |
+
+### Citas y Mascotas Service (Puerto 8082)
+
+| Método | Ruta | Roles | Descripción |
+| :--- | :--- | :--- | :--- |
+| GET | /api/v1/mascotas/mis-mascotas | CLIENTE | Lista las mascotas del cliente en sesión |
+| POST | /api/v1/mascotas | CLIENTE, ADMIN | Registra una nueva mascota |
+| GET | /api/v1/mascotas/{id} | VET, ADMIN | Obtiene los datos de una mascota por ID |
+| POST | /api/v1/citas | CLIENTE, ADMIN | Agenda una cita validando horario y límite |
+| GET | /api/v1/citas/agenda | VET, ADMIN | Muestra la agenda de citas a partir de la fecha actual |
+| PATCH | /api/v1/citas/{id}/cancelar | CLIENTE, ADMIN | Cancela una cita si faltan más de 2 horas |
+| PATCH | /api/v1/citas/{id}/completar | VET, ADMIN | Marca una cita como COMPLETADA (usado por Feign) |
+
+### Expedientes Service (Puerto 8083)
+
+| Método | Ruta | Roles | Descripción |
+| :--- | :--- | :--- | :--- |
+| POST | /api/v1/expedientes | VET, ADMIN | Guarda expediente y completa la cita médica por Feign |
+| GET | /api/v1/expedientes/mascota/{mascotaId} | VET, CLIENTE, ADMIN | Consulta el historial clínico de una mascota |
+| GET | /api/v1/expedientes/{id} | VET, CLIENTE, ADMIN | Consulta un expediente por ID |
+| GET | /api/v1/expedientes/cita/{citaId} | VET, CLIENTE, ADMIN | Consulta un expediente por ID de cita |
+
+---
+
+## 6. Instrucciones de ejecución
+
+### Compilar el proyecto completo
+
+Desde la carpeta raíz del proyecto:
+
+```powershell
 .\mvnw.cmd clean install -DskipTests
 ```
-*(O simplemente `mvn clean install` si tienes Maven configurado en tu PATH global).*
 
-### 2. Iniciar los 3 Microservicios Simultáneamente (PowerShell)
-Puedes iniciar automáticamente los 3 servicios en terminales independientes ejecutando el script incluido:
+### Iniciar los 3 microservicios
+
+Puedes iniciar los 3 servicios al mismo tiempo ejecutando el script de PowerShell:
+
 ```powershell
 .\start-microservicios.ps1
 ```
 
-O si prefieres ejecutarlos manualmente en una sola línea o ventanas individuales:
+O si prefieres levantarlos en terminales separadas:
 
-**Opción A — Comando en una sola línea (PowerShell):**
-```powershell
-Start-Process powershell "-NoExit -Command .\mvnw.cmd spring-boot:run -pl auth-service"; Start-Process powershell "-NoExit -Command .\mvnw.cmd spring-boot:run -pl citas-mascotas-service"; Start-Process powershell "-NoExit -Command .\mvnw.cmd spring-boot:run -pl expedientes-service"
-```
-
-**Opción B — En terminales manuales:**
-- **Terminal 1 (Auth Service - Puerto 8081):**
-  ```bash
+- Terminal 1 (Auth):
+  ```powershell
   .\mvnw.cmd spring-boot:run -pl auth-service
   ```
-- **Terminal 2 (Citas Service - Puerto 8082):**
-  ```bash
+- Terminal 2 (Citas):
+  ```powershell
   .\mvnw.cmd spring-boot:run -pl citas-mascotas-service
   ```
-- **Terminal 3 (Expedientes Service - Puerto 8083):**
-  ```bash
+- Terminal 3 (Expedientes):
+  ```powershell
   .\mvnw.cmd spring-boot:run -pl expedientes-service
   ```
 
 ---
 
-## 🧪 Pruebas Funcionales y de Integración
+## 7. Pruebas
 
-Una vez iniciados los 3 servicios, puedes ejecutar la suite de pruebas automatizadas:
+### Con Postman
 
-- **En Windows PowerShell:**
+En la raíz del proyecto está el archivo `Veterinaria_Microservicios.postman_collection.json`.
+
+1. Abre Postman y usa la opción "Import" para cargar el archivo.
+2. Al ejecutar las peticiones de login (cliente o veterinario), el token se guarda automáticamente en las variables de la colección y se reutiliza en las demás peticiones.
+
+### Con scripts de terminal
+
+Con los microservicios ya levantados, puedes ejecutar las pruebas automáticas:
+
+- En PowerShell:
   ```powershell
   .\test-veterinaria.ps1
   ```
-- **En Git Bash o Linux / macOS:**
+- En Git Bash o Linux:
   ```bash
   chmod +x test-veterinaria.sh
   ./test-veterinaria.sh

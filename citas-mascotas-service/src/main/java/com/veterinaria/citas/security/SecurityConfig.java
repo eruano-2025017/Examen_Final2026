@@ -38,6 +38,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/citas/agenda").hasAnyRole("VET", "ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/citas/*/cancelar").hasAnyRole("CLIENTE", "ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/citas/*/completar").hasAnyRole("VET", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/citas/*/completar").hasAnyRole("VET", "ADMIN")
 
                         .requestMatchers("/h2-console/**").permitAll()
                         .anyRequest().authenticated()

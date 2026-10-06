@@ -46,7 +46,7 @@ public class CitaController {
         return ResponseEntity.ok(citaService.cancelarCita(id, usuarioId, rol));
     }
 
-    @PatchMapping("/{id}/completar")
+    @RequestMapping(value = "/{id}/completar", method = {RequestMethod.PATCH, RequestMethod.PUT})
     public ResponseEntity<CitaResponseDTO> completarCita(@PathVariable Long id) {
         return ResponseEntity.ok(citaService.completarCita(id));
     }
